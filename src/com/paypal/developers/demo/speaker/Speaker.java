@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.paypal.developers;
+package com.paypal.developers.demo.speaker;
 
+import com.paypal.developers.demo.jokespi.Main;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,16 +16,23 @@ import java.util.logging.Logger;
  *
  * @author jprestes
  */
-public class Main {
-
+public class Speaker {
     /**
-     * @param args the command line arguments
+     * Uses eSpeak T2S to speak some words
+     * @param text Text you desire to listen to
+     * @param language in which language the text was written
      */
-    public static void main(String[] args) {
+    public static void speak(String text, String language)  {
         try {
             
+            if (text.length()>42)   {
+                text = text.substring(0, 42);
+                Logger.getLogger(Main.class.getName()).log(Level.INFO, "Due a eSpeak bug, the text was truncated to fit 42 characters.");
+            }
+            
             String system = System.getProperty("os.name");
-            System.out.println(system);
+            String eSpeakLocation = "";
+            Logger.getLogger(Main.class.getName()).log(Level.INFO, system);
             
             Process proc = null;
             //TODO: Figure out how use eSpeak on Windows
@@ -32,28 +40,27 @@ public class Main {
                 
             
             } else if (system.contains("Mac"))  {
-                proc = Runtime.getRuntime().exec("/usr/local/Cellar/espeak/1.48.04/bin/espeak -m -vpt -s140 'muito&nbsp;obrigado'");
+                eSpeakLocation = "/usr/local/Cellar/espeak/1.48.04/bin/espeak -m -v";
             
             } else  {
-                proc = Runtime.getRuntime().exec("/usr/bin/espeak -m -vpt -s140 'muito&nbsp;obrigado'");
+                eSpeakLocation = "/usr/bin/espeak -m -v";
             }
             
+            proc = Runtime.getRuntime().exec(eSpeakLocation + language + " -s140 '" + text + "'");
+
             //proc.waitFor();
+            
             BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line;
             while ((line = br.readLine()) != null) {
-                System.out.println(line);
+                Logger.getLogger(Main.class.getName()).log(Level.INFO, line);
             }
             br.close();
-            System.out.println("Program terminated!");
+            Logger.getLogger(Main.class.getName()).log(Level.INFO, "Speech finished.");
 
             
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-       // } catch (InterruptedException ex) {
-        //    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
-    
 }
